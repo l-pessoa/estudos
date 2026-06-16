@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Line Dev — Diário de Bordo do Lucas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea:#0a1420;        /* fundo: mar à noite */
+  --hull:#12222f;       /* painéis: casco do navio */
+  --hull-2:#0e1b27;
+  --paper:#e9e4d4;      /* texto: papel envelhecido */
+  --paper-dim:#a8a596;
+  --gold:#f0b541;       /* progresso, rota, tesouro */
+  --teal:#3fa7a0;       /* trilha JS/web */
+  --coral:#e85d4a;      /* trilha Java (bandeira vermelha) */
+  --violet:#9b7fd4;     /* trilha IA */
+  --line:#23394a;
+  --ok:#6fc77e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--sea);color:var(--paper);font-family:'Sora',sans-serif;font-size:15.5px;line-height:1.65;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%, #15293a 0%, transparent 60%);}
+a{color:var(--gold);text-decoration:none;border-bottom:1px dotted rgba(240,181,65,.45)}
+a:hover{border-bottom-style:solid}
+a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- Masthead ---------- */
+header{max-width:1060px;margin:0 auto;padding:38px 22px 8px;text-align:center}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.22em;color:var(--teal);text-transform:uppercase}
+h1.logo{font-family:'Pirata One',cursive;font-size:clamp(2.6rem,7vw,4.4rem);font-weight:400;color:var(--paper);line-height:1.05;margin:6px 0 4px}
+h1.logo .g{color:var(--gold)}
+.sub{color:var(--paper-dim);max-width:620px;margin:0 auto;font-size:14.5px}
+
+/* ---------- Rota (signature) ---------- */
+.route-wrap{max-width:1060px;margin:26px auto 0;padding:0 22px}
+.route{display:flex;align-items:flex-start;justify-content:space-between;position:relative;padding:10px 0 4px}
+.route::before{content:"";position:absolute;top:32px;left:6%;right:6%;border-top:3px dashed rgba(240,181,65,.5)}
+.island{position:relative;z-index:1;background:none;border:none;cursor:pointer;color:var(--paper-dim);
+  font-family:'Sora',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px;width:19%;padding:4px 2px}
+.island .dot{width:46px;height:46px;border-radius:50%;background:var(--hull);border:2px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;
+  font-weight:600;color:var(--paper-dim);transition:.2s}
+.island .lbl{font-size:12px;line-height:1.3;text-align:center}
+.island .pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold)}
+.island:hover .dot{border-color:var(--gold);color:var(--paper)}
+.island.active .dot{background:var(--gold);border-color:var(--gold);color:#1b1405}
+.island.active{color:var(--paper)}
+
+/* ---------- Nav secundária ---------- */
+nav.tabs{max-width:1060px;margin:18px auto 0;padding:0 22px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+nav.tabs button{background:var(--hull);border:1px solid var(--line);color:var(--paper-dim);padding:8px 14px;
+  border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;transition:.15s}
+nav.tabs button:hover{color:var(--paper);border-color:var(--gold)}
+nav.tabs button.active{background:var(--gold);color:#1b1405;border-color:var(--gold);font-weight:600}
+
+/* ---------- Painéis ---------- */
+main{max-width:1060px;margin:26px auto 80px;padding:0 22px}
+section.panel{display:none;animation:fade .25s ease}
+section.panel.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){section.panel{animation:none}}
+
+.card{background:var(--hull);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:18px}
+.card.alt{background:var(--hull-2)}
+h2{font-size:1.5rem;margin-bottom:4px}
+h2 .tagmes{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);display:block;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px}
+h3{font-size:1.06rem;margin:18px 0 8px;color:var(--gold)}
+h3:first-child{margin-top:0}
+p{margin-bottom:10px}
+p:last-child{margin-bottom:0}
+ul.plain{list-style:none;margin:8px 0}
+ul.plain li{padding:7px 0 7px 26px;position:relative;border-bottom:1px dashed rgba(35,57,74,.7)}
+ul.plain li:last-child{border-bottom:none}
+ul.plain li::before{content:"⚓";position:absolute;left:0;top:7px;font-size:13px;opacity:.7}
+
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 9px;border-radius:999px;margin-right:6px;vertical-align:1px}
+.pill.js{background:rgba(63,167,160,.15);color:var(--teal);border:1px solid rgba(63,167,160,.4)}
+.pill.java{background:rgba(232,93,74,.14);color:var(--coral);border:1px solid rgba(232,93,74,.4)}
+.pill.ia{background:rgba(155,127,212,.14);color:var(--violet);border:1px solid rgba(155,127,212,.4)}
+.pill.soft{background:rgba(240,181,65,.12);color:var(--gold);border:1px solid rgba(240,181,65,.4)}
+
+.javabox{border-left:3px solid var(--coral);background:rgba(232,93,74,.07);border-radius:0 10px 10px 0;padding:14px 18px;margin:14px 0}
+.javabox .jb-title{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--coral);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.iabox{border-left:3px solid var(--violet);background:rgba(155,127,212,.07);border-radius:0 10px 10px 0;padding:14px 18px;margin:14px 0}
+.iabox .jb-title{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--violet);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+
+/* ---------- Checklists ---------- */
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed rgba(35,57,74,.7);cursor:pointer}
+.check:last-child{border-bottom:none}
+.check input{margin-top:4px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.check span{transition:.15s}
+.check input:checked + span{color:var(--paper-dim);text-decoration:line-through;text-decoration-color:rgba(240,181,65,.6)}
+.meta-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.meta-head .count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold)}
+.bar{height:6px;background:var(--hull-2);border-radius:99px;overflow:hidden;margin-bottom:12px;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .3s}
+
+/* ---------- Tabelas ---------- */
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-dim)}
+tr.hl td{background:rgba(240,181,65,.06)}
+
+.linkrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.linkrow a{background:var(--hull-2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;border-bottom:1px solid var(--line)}
+.linkrow a:hover{border-color:var(--gold)}
+.note{font-size:13px;color:var(--paper-dim);font-style:italic}
+.kbd{font-family:'JetBrains Mono',monospace;background:var(--hull-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.route .lbl{font-size:10.5px}.island .dot{width:38px;height:38px}}
+footer{max-width:1060px;margin:0 auto 50px;padding:0 22px;text-align:center;color:var(--paper-dim);font-size:13px}
+footer .quote{font-family:'Pirata One',cursive;font-size:1.3rem;color:var(--gold);margin-bottom:4px}
+.savemsg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--paper-dim);text-align:right;margin-top:6px;min-height:14px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Diário de bordo · ADS · 2026</div>
+  <h1 class="logo">Grand Line <span class="g">Dev</span></h1>
+  <p class="sub">A rota do Lucas até o primeiro emprego dev: 4 fases, 2 trilhas em paralelo (Web/JS <b>+ Java da faculdade</b>) e 1 diferencial (IA aplicada). Marque as metas — seu progresso fica salvo.</p>
+</header>
+
+<div class="route-wrap">
+  <div class="route" id="route">
+    <button class="island" data-go="f1"><span class="dot">F1</span><span class="lbl">Fundamentos<br>meses 1–3</span><span class="pct" data-pct="f1">0%</span></button>
+    <button class="island" data-go="f2"><span class="dot">F2</span><span class="lbl">Stack Web<br>meses 4–7</span><span class="pct" data-pct="f2">0%</span></button>
+    <button class="island" data-go="f3"><span class="dot">F3</span><span class="lbl">Java Pro + IA<br>meses 8–12</span><span class="pct" data-pct="f3">0%</span></button>
+    <button class="island" data-go="f4"><span class="dot">F4</span><span class="lbl">Mercado<br>meses 12–18</span><span class="pct" data-pct="f4">0%</span></button>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-go="inicio" class="active">⛵ Início</button>
+  <button data-go="f1">Fase 1</button>
+  <button data-go="f2">Fase 2</button>
+  <button data-go="f3">Fase 3</button>
+  <button data-go="f4">Fase 4</button>
+  <button data-go="java">☕ Trilha Java</button>
+  <button data-go="ia">🤖 IA na prática</button>
+  <button data-go="ingles">🌍 Inglês & Soft Skills</button>
+  <button data-go="projetos">🛠 Projetos</button>
+  <button data-go="rotina">🕘 Rotina</button>
+  <button data-go="recursos">🗺 Todos os links</button>
+</nav>
+
+<main>
+
+<!-- ==================== INÍCIO ==================== -->
+<section class="panel show" id="inicio">
+  <div class="card">
+    <h2><span class="tagmes">Leia primeiro</span>Como esta rota funciona</h2>
+    <p>Você navega com <b>duas trilhas ao mesmo tempo</b>, e isso é proposital:</p>
+    <ul class="plain">
+      <li><span class="pill js">JS/WEB</span> Sua trilha de <b>portfólio e velocidade</b>: JavaScript → React → Node → SQL → TypeScript. É onde você coloca projeto no ar rápido e onde estão muitas vagas júnior.</li>
+      <li><span class="pill java">JAVA</span> Sua trilha da <b>faculdade e do mercado corporativo</b>: a facul vai te dar lógica e POO em Java — não lute contra isso, <b>capriche nisso</b>. Java domina bancos, fintechs e grandes empresas no Brasil. Quem sabe Java + Spring Boot entra num mercado que paga bem e tem menos júnior brigando por vaga.</li>
+      <li><span class="pill ia">IA</span> O <b>diferencial</b>: construir com IA (APIs de LLM, RAG, agentes), não só usar ChatGPT. Pouquíssimo júnior sabe. É o que faz recrutador parar de rolar a tela.</li>
+      <li><span class="pill soft">SOFT</span> O <b>multiplicador</b>: inglês diário + LinkedIn ativo + escrever sobre o que aprende. Sem isso, as outras trilhas rendem metade.</li>
+    </ul>
+    <h3>Por que JS + Java juntos não é loucura</h3>
+    <p>Porque os <b>fundamentos são os mesmos</b>: lógica, POO, estrutura de dados, HTTP, banco. Você aprende o conceito uma vez e só muda a sintaxe. A facul puxa Java de qualquer jeito (provas e projetos), então a trilha Java aqui está sincronizada com o que você já vai ter que estudar — zero esforço desperdiçado. E ter as duas stacks no currículo conta a história perfeita: <i>"faço front e entrego rápido com JS, e construo back-end corporativo com Java/Spring"</i>.</p>
+    <h3>Regras do navio</h3>
+    <ul class="plain">
+      <li><b>Constância &gt; intensidade.</b> 5h num dia bom, 1h num dia ruim — mas nunca zero. Commit todo dia.</li>
+      <li><b>Nunca cole código que não consegue explicar.</b> Em entrevista isso afunda o navio.</li>
+      <li><b>Projeto inacabado não existe pro recrutador.</b> Melhor 1 projeto pequeno no ar do que 3 pela metade.</li>
+      <li><b>A facul é o mínimo, não o teto.</b> Use-a pro diploma, pras bases e pra trilha Java. O resto está aqui.</li>
+    </ul>
+  </div>
+  <div class="card alt">
+    <h2><span class="tagmes">Visão da rota</span>O mapa em 1 minuto</h2>
+    <table>
+      <tr><th>Fase</th><th>Foco JS/Web</th><th>Foco Java (facul)</th><th>Entrega de portfólio</th></tr>
+      <tr><td><b>F1</b> · m. 1–3</td><td>JS moderno, Git, HTML/CSS pro, lógica</td><td>Lógica + POO bem feitas (notas + base)</td><td>Laurverse refatorado + GitHub vivo</td></tr>
+      <tr><td><b>F2</b> · m. 4–7</td><td>React, Node/Express, SQL, TypeScript</td><td>Collections, exceções, JDBC; acompanhar matérias</td><td>App full-stack com API própria e deploy</td></tr>
+      <tr class="hl"><td><b>F3</b> · m. 8–12</td><td>Manutenção + Python p/ scripts</td><td><b>Spring Boot</b>: API REST profissional em Java</td><td>Projeto com IA (RAG) + API Spring no ar</td></tr>
+      <tr><td><b>F4</b> · m. 12–18</td><td colspan="2">Entrevistas, open source, freelas, certificação cloud</td><td>Pipeline de vagas rodando, 4–5 projetos fortes</td></tr>
+    </table>
+    <p class="note">No mês ~7 você decide qual stack vira a principal (a outra vira apoio) com base no que curtir mais e nas vagas que aparecerem. Até lá, as duas andam juntas sem conflito porque a facul banca a parte Java.</p>
+  </div>
+</section>
+
+<!-- ==================== FASE 1 ==================== -->
+<section class="panel" id="f1">
+  <div class="card">
+    <h2><span class="tagmes">Fase 1 · meses 1–3</span>Fundamentos — o casco do navio</h2>
+    <p><b>Objetivo:</b> sair daqui sabendo programar de verdade (não copiar tutorial), com Git fluente, GitHub vivo e a base de POO da facul dominada.</p>
+
+    <h3><span class="pill js">JS/WEB</span> JavaScript moderno (prioridade nº 1)</h3>
+    <p>Você já mexe com JS no Laurverse — agora vá fundo: variáveis e escopo, funções, arrays e objetos, <span class="kbd">map/filter/reduce</span>, DOM, eventos, <span class="kbd">fetch</span>, <span class="kbd">async/await</span> e promises, módulos, closures, tratamento de erro.</p>
+    <div class="linkrow">
+      <a href="https://www.cursoemvideo.com/curso/javascript/" target="_blank">Curso em Vídeo — JavaScript (Guanabara, PT, grátis)</a>
+      <a href="https://javascript.info/" target="_blank">JavaScript.info (a melhor referência escrita)</a>
+      <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript" target="_blank">MDN em português</a>
+    </div>
+
+    <h3><span class="pill js">JS/WEB</span> Git & GitHub (seu currículo vivo)</h3>
+    <p>init, add, commit, branch, merge, push/pull, pull request, resolver conflito, escrever README. Meta: commit <b>todo dia</b>, mesmo pequeno.</p>
+    <div class="linkrow">
+      <a href="https://learngitbranching.js.org/?locale=pt_BR" target="_blank">Learn Git Branching (jogo interativo, PT)</a>
+      <a href="https://www.youtube.com/cursoemvideo" target="_blank">Curso em Vídeo — playlist Git/GitHub</a>
+    </div>
+
+    <h3><span class="pill js">JS/WEB</span> HTML & CSS profissional</h3>
+    <p>Flexbox e Grid a fundo, mobile-first, unidades responsivas, variáveis CSS, acessibilidade básica. Você já apanhou de seletor CSS no Laurverse — agora domine a especificidade pra nunca mais apanhar.</p>
+    <div class="linkrow">
+      <a href="https://www.frontendmentor.io/" target="_blank">Frontend Mentor (desafios reais com design pronto)</a>
+      <a href="https://developer.mozilla.org/pt-BR/docs/Learn_web_development" target="_blank">MDN — Aprenda desenvolvimento web</a>
+    </div>
+
+    <h3>Lógica e exercícios (treino de academia)</h3>
+    <p>30+ exercícios resolvidos nesta fase. Faça em JS <b>e refaça alguns em Java</b> — é o jeito mais rápido de aprender a segunda linguagem.</p>
+    <div class="linkrow">
+      <a href="https://judge.beecrowd.com/" target="_blank">beecrowd (em PT, usado em facul)</a>
+      <a href="https://exercism.org/" target="_blank">Exercism (JS e Java, com mentoria grátis)</a>
+    </div>
+
+    <div class="javabox">
+      <div class="jb-title">☕ Java na faculdade — Fase 1</div>
+      <p><b>O que a facul vai cobrar:</b> lógica, sintaxe Java, POO (classes, objetos, herança, polimorfismo, encapsulamento, interfaces). <b>Sua jogada:</b> não estude "pra prova" — estude pra dominar, porque POO é a base de TUDO (inclusive do JS avançado e do React). Se a aula da facul for fraca, complemente:</p>
+      <div class="linkrow">
+        <a href="https://www.cursoemvideo.com/curso/java-basico/" target="_blank">Curso em Vídeo — Java Básico (Guanabara)</a>
+        <a href="https://www.cursoemvideo.com/curso/java-poo/" target="_blank">Curso em Vídeo — Java POO</a>
+        <a href="https://www.youtube.com/@DevDojoBrasil" target="_blank">DevDojo — Maratona Java (a mais completa do YouTube BR)</a>
+        <a href="https://loiane.training/" target="_blank">Loiane Groner — cursos Java grátis</a>
+      </div>
+      <p class="note">Truque: quando aprender um conceito em Java na facul (ex: herança), escreva no mesmo dia um exemplo do mesmo conceito em JS. Você fixa o conceito 2x e aprende a separar "ideia" de "sintaxe".</p>
+    </div>
+
+    <div class="iabox">
+      <div class="jb-title">🤖 IA nesta fase — modo aprendizado</div>
+      <p>Use IA como <b>professor particular</b>, não como estagiário: peça pra explicar linha a linha, pedir exercícios sobre o que estudou, e criticar seu código ("aponte 3 problemas neste código e por quê"). Proibido: colar código que não explica.</p>
+    </div>
+
+    <h3>Metas da Fase 1</h3>
+    <div class="meta-head"><span></span><span class="count" data-count="f1">0/9</span></div>
+    <div class="bar"><i data-bar="f1"></i></div>
+    <label class="check"><input type="checkbox" data-k="f1-js"><span>Concluí um curso completo de JS e sei explicar async/await pra outra pessoa</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-git"><span>Git fluente: branch, merge, PR e conflito resolvido sem pânico</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-streak"><span>30 dias seguidos de commit no GitHub</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-css"><span>2 desafios do Frontend Mentor entregues e responsivos</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-logica"><span>30+ exercícios no beecrowd/Exercism (alguns refeitos em Java)</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-poo"><span>POO em Java dominada: sei explicar herança, polimorfismo e interface com exemplo meu</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-laur"><span>Projeto 1 entregue: pedaço do Laurverse refatorado e publicado com README caprichado</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-li"><span>LinkedIn criado, completo, com 1º post publicado</span></label>
+    <label class="check"><input type="checkbox" data-k="f1-en"><span>90 dias de inglês diário sem falhar (30 min/dia)</span></label>
+  </div>
+</section>
+
+<!-- ==================== FASE 2 ==================== -->
+<section class="panel" id="f2">
+  <div class="card">
+    <h2><span class="tagmes">Fase 2 · meses 4–7</span>Stack Web — içar as velas</h2>
+    <p><b>Objetivo:</b> construir e publicar uma aplicação full-stack completa (front + API própria + banco), enquanto a trilha Java avança junto com as matérias da facul.</p>
+
+    <h3><span class="pill js">JS/WEB</span> React</h3>
+    <p>Componentes, props, estado, hooks (<span class="kbd">useState</span>, <span class="kbd">useEffect</span>), listas e formulários, consumo de API, roteamento. O framework mais pedido em vaga júnior no Brasil.</p>
+    <div class="linkrow">
+      <a href="https://react.dev/learn" target="_blank">Documentação oficial do React (excelente, faça os tutoriais)</a>
+      <a href="https://www.rocketseat.com.br/" target="_blank">Rocketseat — trilha Discover (grátis) e comunidade BR</a>
+    </div>
+
+    <h3><span class="pill js">JS/WEB</span> Node.js + Express — sua primeira API própria</h3>
+    <p>Você consumiu a API do Xano no Laurverse; agora construa a sua: rotas, middlewares, REST, autenticação com JWT, validação, conexão com banco.</p>
+    <div class="linkrow">
+      <a href="https://nodejs.org/pt" target="_blank">Node.js — docs oficiais</a>
+      <a href="https://expressjs.com/pt-br/" target="_blank">Express em português</a>
+      <a href="https://www.theodinproject.com/" target="_blank">The Odin Project — trilha full-stack JS completa (EN, já treina inglês)</a>
+    </div>
+
+    <h3>SQL + PostgreSQL (inegociável, vale pras duas trilhas)</h3>
+    <p>SELECT, WHERE, JOINs, GROUP BY, modelagem de tabelas, chaves, índices básicos. Cai em <b>toda</b> entrevista — de JS e de Java.</p>
+    <div class="linkrow">
+      <a href="https://sqlbolt.com/" target="_blank">SQLBolt (interativo, comece aqui)</a>
+      <a href="https://www.postgresql.org/docs/" target="_blank">PostgreSQL docs</a>
+    </div>
+
+    <h3><span class="pill js">JS/WEB</span> TypeScript</h3>
+    <p>Depois do React: tipos, interfaces, generics básicos. Detalhe interessante: <b>TS vai parecer fácil pra você por causa do Java</b> — tipagem estática é exatamente o que a facul te ensinou. As trilhas se ajudam.</p>
+    <div class="linkrow">
+      <a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank">TypeScript Handbook oficial</a>
+    </div>
+
+    <div class="javabox">
+      <div class="jb-title">☕ Java na faculdade — Fase 2</div>
+      <p><b>O que a facul deve cobrar:</b> estrutura de dados, collections (List, Map, Set), tratamento de exceções, arquivos, talvez JDBC (Java + banco). <b>Sua jogada:</b> acompanhe as matérias com capricho e conecte com o que está fazendo em JS — quando fizer sua API Node com PostgreSQL, refaça uma versão simples da conexão com banco em Java/JDBC. Mesma ideia, sintaxe diferente.</p>
+      <div class="linkrow">
+        <a href="https://www.youtube.com/@DevDojoBrasil" target="_blank">DevDojo — Maratona Java (collections, exceções)</a>
+        <a href="https://www.baeldung.com/" target="_blank">Baeldung (referência escrita de Java, EN)</a>
+      </div>
+      <p class="note">Projetos da facul em Java: trate cada um como peça de portfólio. Suba no GitHub com README, mesmo sendo simples. "Projeto da faculdade bem documentado" já te diferencia da turma inteira.</p>
+    </div>
+
+    <div class="iabox">
+      <div class="jb-title">🤖 IA nesta fase — modo copiloto consciente</div>
+      <p>Comece a usar ferramentas de código com IA (Claude Code, Copilot, Cursor) <b>entendendo o que geram</b>. Exercício: peça pra IA gerar uma função, depois escreva você mesmo sem olhar, depois compare. Aprenda prompt engineering de verdade: contexto + exemplos + formato de saída.</p>
+      <div class="linkrow">
+        <a href="https://www.deeplearning.ai/short-courses/" target="_blank">DeepLearning.AI — short courses grátis (prompt engineering, ~1h)</a>
+      </div>
+    </div>
+
+    <h3>Metas da Fase 2</h3>
+    <div class="meta-head"><span></span><span class="count" data-count="f2">0/8</span></div>
+    <div class="bar"><i data-bar="f2"></i></div>
+    <label class="check"><input type="checkbox" data-k="f2-react"><span>Sei criar um app React do zero: componentes, estado, consumo de API</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-node"><span>Construí minha primeira API REST própria com Node + Express + JWT</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-sql"><span>SQL confortável: JOINs e modelagem sem colar do Google</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-ts"><span>TypeScript no dia a dia dos meus projetos</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-proj2"><span>Projeto 2 no ar: app full-stack completo com deploy (o projeto de entrevista)</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-javafacul"><span>Collections e exceções em Java dominadas + projetos da facul no GitHub</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-posts"><span>10+ posts no LinkedIn e 200+ conexões da área</span></label>
+    <label class="check"><input type="checkbox" data-k="f2-estagio"><span>Comecei a aplicar pra estágio (sim, já — entrevista é treino)</span></label>
+  </div>
+</section>
+
+<!-- ==================== FASE 3 ==================== -->
+<section class="panel" id="f3">
+  <div class="card">
+    <h2><span class="tagmes">Fase 3 · meses 8–12</span>Java Pro + IA — o tesouro do diferencial</h2>
+    <p><b>Objetivo:</b> aqui você deixa de ser "mais um estudando JS" e vira raro: um júnior com <b>Spring Boot</b> (mercado corporativo) e um projeto de <b>IA aplicada</b> funcionando. Esta é a fase que paga a viagem inteira.</p>
+
+    <div class="javabox">
+      <div class="jb-title">☕ Spring Boot — o Java do mercado de verdade</div>
+      <p>A facul te deu a base; o mercado quer <b>Spring</b>. É o framework que roda em banco, fintech, seguradora e governo. Estude: criar projeto no Spring Initializr, API REST com Spring Web, Spring Data JPA + PostgreSQL, validação, tratamento de erros, autenticação com Spring Security (básico).</p>
+      <div class="linkrow">
+        <a href="https://start.spring.io/" target="_blank">Spring Initializr (gerador de projeto oficial)</a>
+        <a href="https://spring.io/guides" target="_blank">Spring Guides oficiais (tutoriais curtos e ótimos)</a>
+        <a href="https://www.youtube.com/@MichelliBrito" target="_blank">Michelli Brito (YouTube, Spring em PT — referência BR)</a>
+        <a href="https://www.youtube.com/@kipperdev" target="_blank">Fernanda Kipper (YouTube, projetos Java/Spring práticos em PT)</a>
+      </div>
+      <p><b>Entrega:</b> refaça em Spring Boot a API que você fez em Node na Fase 2. Mesmo domínio, outra stack. No README, compare as duas. Isso é OURO em entrevista: prova que você entende <i>conceitos</i>, não decoreba de framework.</p>
+    </div>
+
+    <div class="iabox">
+      <div class="jb-title">🤖 IA aplicada — de usuário a construtor</div>
+      <p>Agora você <b>constrói</b> com IA: consumir API de LLM (é só uma API REST — você já faz isso desde o Xano), embeddings, <b>RAG</b> (busca em documentos + IA), function calling (IA que executa ações) e noções de agentes.</p>
+      <div class="linkrow">
+        <a href="https://docs.claude.com/" target="_blank">Docs da API da Anthropic (são um tutorial ótimo)</a>
+        <a href="https://platform.openai.com/docs" target="_blank">Docs da OpenAI</a>
+        <a href="https://www.deeplearning.ai/short-courses/" target="_blank">DeepLearning.AI — RAG, agentes, function calling (grátis)</a>
+        <a href="https://huggingface.co/learn" target="_blank">Hugging Face Learn (grátis)</a>
+      </div>
+      <p><b>Entrega:</b> Projeto 4 — chatbot RAG (ex: "pergunte qualquer coisa sobre One Piece" com base de documentos, ou assistente que responde sobre PDFs enviados). Um júnior com RAG funcional no portfólio é raríssimo.</p>
+    </div>
+
+    <h3><span class="pill ia">IA</span> Python (terceira linguagem, agora é rápido)</h3>
+    <p>Com JS + Java na bagagem, Python entra em 3–4 semanas: sintaxe, requests, manipulação de arquivos, scripts de automação. É a língua franca da IA.</p>
+    <div class="linkrow">
+      <a href="https://www.cursoemvideo.com/curso/python-3-mundo-1/" target="_blank">Curso em Vídeo — Python (Guanabara)</a>
+      <a href="https://docs.python.org/pt-br/3/tutorial/" target="_blank">Tutorial oficial Python em PT</a>
+    </div>
+
+    <h3>Docker + Cloud (básico que abre porta)</h3>
+    <p>Containerize suas APIs (Node e Spring). Depois, noções de nuvem com certificação de entrada — pesa muito em currículo júnior.</p>
+    <div class="linkrow">
+      <a href="https://docs.docker.com/get-started/" target="_blank">Docker — Get Started oficial</a>
+      <a href="https://skillbuilder.aws/" target="_blank">AWS Skill Builder (cursos grátis p/ Cloud Practitioner)</a>
+    </div>
+
+    <h3>Metas da Fase 3</h3>
+    <div class="meta-head"><span></span><span class="count" data-count="f3">0/8</span></div>
+    <div class="bar"><i data-bar="f3"></i></div>
+    <label class="check"><input type="checkbox" data-k="f3-spring"><span>API REST completa em Spring Boot + JPA + PostgreSQL no ar (Projeto 3)</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-compare"><span>README comparando a API Node vs Spring publicado</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-rag"><span>Projeto 4 com IA (RAG) funcionando e com deploy</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-py"><span>Python funcional: 2 scripts de automação úteis no GitHub</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-docker"><span>Minhas APIs rodando em Docker</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-cloud"><span>Estudando p/ AWS Cloud Practitioner (ou AZ-900)</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-os"><span>1 contribuição open source aceita (vale doc/tradução)</span></label>
+    <label class="check"><input type="checkbox" data-k="f3-en"><span>Inglês: leio documentação técnica sem tradutor</span></label>
+  </div>
+</section>
+
+<!-- ==================== FASE 4 ==================== -->
+<section class="panel" id="f4">
+  <div class="card">
+    <h2><span class="tagmes">Fase 4 · meses 12–18</span>Mercado — atracar no porto</h2>
+    <p><b>Objetivo:</b> transformar tudo em emprego. Aqui o estudo técnico vira manutenção (1–2h/dia) e o grosso da energia vai pra <b>pipeline de vagas, entrevistas e visibilidade</b>.</p>
+
+    <h3>O pipeline de vagas (trate como projeto)</h3>
+    <ul class="plain">
+      <li><b>Meta semanal:</b> 10 aplicações + 5 mensagens diretas pra recrutadores/devs no LinkedIn (curtas, citando um projeto seu).</li>
+      <li><b>Onde:</b> LinkedIn Jobs, Gupy, programas de estágio/trainee de bancos e fintechs (lembre: você tem Java/Spring — Itaú, Bradesco, Nubank, PicPay etc. adoram), e indicação via comunidades.</li>
+      <li><b>Currículo de 1 página:</b> projetos com link no topo, stack clara (JS/TS/React/Node + Java/Spring + SQL + Docker + IA), inglês, GitHub e LinkedIn.</li>
+      <li>Cada "não" vira dado: anote em planilha onde travou (currículo? teste técnico? entrevista?) e corrija o gargalo.</li>
+    </ul>
+
+    <h3>Preparação pra entrevista</h3>
+    <ul class="plain">
+      <li><b>Técnica:</b> revise fundamentos (POO, SQL, HTTP, estrutura de dados) e resolva exercícios cronometrados no beecrowd/Exercism.</li>
+      <li><b>Comportamental:</b> prepare 5 histórias no formato problema → ação → resultado. O Laurverse e seus bugs (seletor CSS, filter invisível, schema da API) são material perfeito.</li>
+      <li><b>Simulação:</b> peça pra IA te entrevistar (técnica e comportamental) e peça feedback brutal. Depois simule com gente de comunidade.</li>
+    </ul>
+
+    <h3>Renda paralela enquanto a vaga não vem</h3>
+    <div class="linkrow">
+      <a href="https://www.99freelas.com.br/" target="_blank">99freelas</a>
+      <a href="https://www.workana.com/" target="_blank">Workana</a>
+    </div>
+    <p class="note">Sites simples, automações e bots pra comércio local também contam como experiência real — "tive cliente" vale tanto quanto "tive usuário".</p>
+
+    <h3>Metas da Fase 4</h3>
+    <div class="meta-head"><span></span><span class="count" data-count="f4">0/7</span></div>
+    <div class="bar"><i data-bar="f4"></i></div>
+    <label class="check"><input type="checkbox" data-k="f4-port"><span>Portfólio final: 4–5 projetos fortes, todos com deploy e README impecável</span></label>
+    <label class="check"><input type="checkbox" data-k="f4-cv"><span>Currículo de 1 página revisado por 2 pessoas da área</span></label>
+    <label class="check"><input type="checkbox" data-k="f4-pipe"><span>Pipeline rodando: 10 aplicações/semana há pelo menos 1 mês</span></label>
+    <label class="check"><input type="checkbox" data-k="f4-int"><span>5+ entrevistas feitas (mesmo as que deram errado — é treino)</span></label>
+    <label class="check"><input type="checkbox" data-k="f4-cert"><span>Certificação cloud de entrada conquistada</span></label>
+    <label class="check"><input type="checkbox" data-k="f4-freela"><span>1º freela ou projeto com usuário/cliente real entregue</span></label>
+    <label class="check"><input type="checkbox" data-k="f4-job"><span>🏴‍☠️ ESTÁGIO OU VAGA JÚNIOR CONQUISTADA</span></label>
+  </div>
+</section>
+
+<!-- ==================== TRILHA JAVA ==================== -->
+<section class="panel" id="java">
+  <div class="card">
+    <h2><span class="tagmes">Trilha paralela</span>☕ Java — da faculdade ao Spring Boot</h2>
+    <p>Esta é a visão completa da trilha Java, sincronizada com a facul. A regra: <b>a faculdade dita o ritmo do básico; você adiciona a camada profissional por cima.</b></p>
+    <table>
+      <tr><th>Etapa</th><th>Conteúdo</th><th>Fonte principal</th><th>Quando</th></tr>
+      <tr><td>1. Sintaxe + lógica</td><td>Variáveis, condicionais, loops, métodos, arrays</td><td>Facul + <a href="https://www.cursoemvideo.com/curso/java-basico/" target="_blank">Curso em Vídeo Java Básico</a></td><td>Fase 1</td></tr>
+      <tr><td>2. POO de verdade</td><td>Classes, herança, polimorfismo, interfaces, abstração, encapsulamento</td><td>Facul + <a href="https://www.cursoemvideo.com/curso/java-poo/" target="_blank">Curso em Vídeo POO</a> + <a href="https://www.youtube.com/@DevDojoBrasil" target="_blank">Maratona Java (DevDojo)</a></td><td>Fase 1–2</td></tr>
+      <tr><td>3. Java intermediário</td><td>Collections (List/Map/Set), exceções, generics, streams/lambda, arquivos</td><td><a href="https://www.youtube.com/@DevDojoBrasil" target="_blank">Maratona Java</a> + <a href="https://loiane.training/" target="_blank">Loiane Training</a> + <a href="https://www.baeldung.com/" target="_blank">Baeldung</a></td><td>Fase 2</td></tr>
+      <tr><td>4. Java + banco</td><td>JDBC, SQL na prática, depois JPA/Hibernate</td><td>Facul (se tiver) + <a href="https://spring.io/guides" target="_blank">Spring Guides</a></td><td>Fase 2–3</td></tr>
+      <tr class="hl"><td>5. Spring Boot</td><td>API REST, Spring Data JPA, validação, Spring Security básico, testes com JUnit</td><td><a href="https://www.youtube.com/@MichelliBrito" target="_blank">Michelli Brito</a> + <a href="https://www.youtube.com/@kipperdev" target="_blank">Fernanda Kipper</a> + <a href="https://spring.io/guides" target="_blank">guias oficiais</a></td><td>Fase 3</td></tr>
+      <tr><td>6. Nível vaga</td><td>Docker na API Spring, deploy, boas práticas, perguntas clássicas de entrevista Java</td><td><a href="https://www.baeldung.com/" target="_blank">Baeldung</a> + simulação com IA</td><td>Fase 3–4</td></tr>
+    </table>
+    <h3>Por que Java vale o esforço (dados do mercado BR)</h3>
+    <ul class="plain">
+      <li>Bancos, fintechs, seguradoras, varejo grande e governo rodam Java. São empresas que <b>contratam júnior em volume</b> via programas de estágio/trainee — e a maioria dos candidatos só tem o Java raso da facul.</li>
+      <li>Você vai ter o que eles não têm: Spring Boot + projeto comparando stacks + SQL + Docker. Isso é perfil de júnior acima da média.</li>
+      <li>Java te dá tipagem e arquitetura "de gente grande" que tornam você melhor também em TypeScript e Node. As trilhas se reforçam.</li>
+    </ul>
+    <h3>Como estudar Java sem atrasar a trilha JS</h3>
+    <ul class="plain">
+      <li><b>Fases 1–2:</b> Java fica no horário da faculdade (você já ia estudar mesmo) + 2 sessões extras de 1h por semana quando tiver prova/projeto.</li>
+      <li><b>Fase 3:</b> inverte — Spring Boot vira o bloco principal da tarde por ~3 meses, e JS vira manutenção.</li>
+      <li><b>Sempre:</b> conceito novo na facul → exemplo em JS no mesmo dia. Conceito novo em JS → pergunte-se "como seria em Java?".</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== IA ==================== -->
+<section class="panel" id="ia">
+  <div class="card">
+    <h2><span class="tagmes">Diferencial</span>🤖 IA na prática — os 3 níveis</h2>
+    <h3>Nível 1 — Usuário (todo mundo está aqui)</h3>
+    <p>Tirar dúvida e gerar código no chat. Zero diferencial. Você passa por aqui em semanas.</p>
+    <h3>Nível 2 — Usuário avançado (Fases 1–2)</h3>
+    <ul class="plain">
+      <li>IA como professor: explicações linha a linha, exercícios sob medida, crítica de código.</li>
+      <li>Prompt engineering real: dar contexto, exemplos, formato de saída esperado.</li>
+      <li>Ferramentas de código com IA (Claude Code, Copilot, Cursor) entendendo cada linha gerada.</li>
+      <li><b>Regra de ouro:</b> nunca commitar código que você não consegue explicar de cabeça.</li>
+    </ul>
+    <h3>Nível 3 — Construtor (Fase 3) — onde mora o tesouro</h3>
+    <ul class="plain">
+      <li><b>API de LLM:</b> chamar Claude/GPT do seu código (Node, Java ou Python). É uma API REST como o Xano — você já sabe 70% disso.</li>
+      <li><b>Embeddings + RAG:</b> transformar documentos em vetores e fazer a IA responder com base neles. O projeto mais pedido por empresas hoje.</li>
+      <li><b>Function calling:</b> IA que consulta seu banco, chama suas APIs e executa ações.</li>
+      <li><b>Agentes:</b> IA que encadeia passos pra cumprir uma tarefa.</li>
+      <li><b>Automação:</b> n8n / scripts Python com IA — mina de freela (atendimento, triagem de e-mail, relatórios).</li>
+    </ul>
+    <div class="linkrow">
+      <a href="https://docs.claude.com/" target="_blank">Anthropic — documentação da API</a>
+      <a href="https://platform.openai.com/docs" target="_blank">OpenAI — documentação</a>
+      <a href="https://www.deeplearning.ai/short-courses/" target="_blank">DeepLearning.AI — short courses grátis</a>
+      <a href="https://huggingface.co/learn" target="_blank">Hugging Face Learn</a>
+      <a href="https://n8n.io/" target="_blank">n8n (automação)</a>
+    </div>
+    <p class="note">Frase pra guardar: um júnior que entrega um chatbot RAG funcional sobre os documentos de uma empresa vale mais, hoje, que muito pleno que só faz CRUD. E quase nenhum júnior sabe fazer isso. Essa é a sua bandeira.</p>
+  </div>
+</section>
+
+<!-- ==================== INGLÊS & SOFT ==================== -->
+<section class="panel" id="ingles">
+  <div class="card">
+    <h2><span class="tagmes">Multiplicador</span>🌍 Inglês & Soft Skills</h2>
+    <h3>Inglês — o diferencial nº 1 do Brasil</h3>
+    <p>Dev júnior com inglês ganha mais, acessa vaga remota internacional e aprende 2x mais rápido (o melhor conteúdo é em EN). Método: <b>30 min por dia, todo dia, com conteúdo técnico</b>:</p>
+    <ul class="plain">
+      <li><b>Meses 1–3:</b> vídeos técnicos com legenda em inglês + app de vocabulário (Anki com termos de programação).</li>
+      <li><b>Meses 4–8:</b> documentação só em inglês (Odin Project, React docs) + vídeos sem legenda em PT.</li>
+      <li><b>Meses 9+:</b> vídeos sem legenda + escrever READMEs em inglês + treinar fala descrevendo seu código em voz alta.</li>
+    </ul>
+    <div class="linkrow">
+      <a href="https://www.youtube.com/@Fireship" target="_blank">Fireship (vídeos de 100s, perfeitos pra treino)</a>
+      <a href="https://youglish.com/" target="_blank">YouGlish (pronúncia de qualquer termo em contexto real)</a>
+      <a href="https://apps.ankiweb.net/" target="_blank">Anki (flashcards)</a>
+    </ul>
+    <h3>Comunicação & presença</h3>
+    <ul class="plain">
+      <li><b>Escreva sobre o que aprende:</b> 1 post/semana no LinkedIn ("aprendi X, eis o que descobri"). Em 1 ano: 50 posts. Isso é mais visibilidade do que 99% dos formandos terão na vida.</li>
+      <li><b>READMEs impecáveis:</b> problema → solução → stack → prints → link ao vivo → o que aprendi. Recrutador lê README, não código.</li>
+      <li><b>Comunidades:</b> Discord da Rocketseat, He4rt Developers, Frontend BR. Sua primeira vaga provavelmente vem de indicação.</li>
+      <li><b>Postura:</b> cumprir prazo autoimposto, responder rápido, dizer "não sei, mas descubro até amanhã". Raro e valioso.</li>
+      <li><b>Documente seus erros:</b> cada bug difícil (você já tem vários do Laurverse) vira post E resposta pra "me conte um problema difícil que você resolveu".</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== PROJETOS ==================== -->
+<section class="panel" id="projetos">
+  <div class="card">
+    <h2><span class="tagmes">Portfólio</span>🛠 Os 6 projetos da rota</h2>
+    <p class="note">Regra: 4–6 projetos excelentes &gt; 20 meia-boca. Todos com deploy, README caprichado e código que você explica de cabeça.</p>
+    <table>
+      <tr><th>#</th><th>Projeto</th><th>Stack</th><th>Fase</th><th>O que prova</th></tr>
+      <tr><td>1</td><td><b>Laurverse refatorado</b> — reescrever uma página com código limpo ou extrair o sistema de autoplay/easter eggs como mini-biblioteca documentada</td><td>JS, CSS</td><td>F1</td><td>Evolução e capacidade de melhorar código legado (raríssimo em júnior)</td></tr>
+      <tr><td>2</td><td><b>App full-stack</b> — ex: gerenciador de coleção de mangás/HQs (use One Piece e Marvel a seu favor: projeto com paixão sai melhor). CRUD completo, login, busca</td><td>React, Node, Express, PostgreSQL, JWT, TS</td><td>F2</td><td>O projeto de entrevista: front + API própria + banco + auth + deploy</td></tr>
+      <tr><td>3</td><td><b>Mesma API em Spring Boot</b> — refazer o back do projeto 2 em Java, com README comparando as stacks</td><td>Java, Spring Boot, JPA, PostgreSQL</td><td>F3</td><td>Domínio de conceitos (não decoreba) + perfil corporativo</td></tr>
+      <tr class="hl"><td>4</td><td><b>Chatbot RAG</b> — ex: "pergunte qualquer coisa sobre One Piece" com base de documentos, ou assistente que lê PDFs do usuário</td><td>API de LLM, embeddings, Node ou Python</td><td>F3</td><td>O diferencial que faz recrutador parar de rolar a tela</td></tr>
+      <tr><td>5</td><td><b>Automação útil</b> — bot de Discord, monitor de preço, gerador de relatório... algo que resolve problema real seu</td><td>Python</td><td>F3</td><td>Que você resolve problemas, não segue tutorial</td></tr>
+      <tr><td>6</td><td><b>Projeto "produto"</b> — micro-SaaS evoluindo o 2 ou 4, com 10 usuários reais (amigos/comunidade)</td><td>Stack completa + Docker</td><td>F4</td><td>"Tive usuários" — frase de ouro em entrevista</td></tr>
+    </table>
+    <h3>Anatomia do README perfeito</h3>
+    <ul class="plain">
+      <li>1 frase: o que é e que problema resolve</li>
+      <li>GIF ou print do projeto funcionando</li>
+      <li>Link do deploy ao vivo</li>
+      <li>Stack e por que escolheu cada coisa</li>
+      <li>Como rodar localmente (testado!)</li>
+      <li>"O que aprendi / maiores desafios" — a seção que recrutador mais gosta</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== ROTINA ==================== -->
+<section class="panel" id="rotina">
+  <div class="card">
+    <h2><span class="tagmes">Dia a dia</span>🕘 Rotina semanal</h2>
+    <p>Considerando: acordar ~8h–9h, buscar o irmão às 12h10, bateria em alguns dias, fim de semana ocupado.</p>
+    <h3>Segunda a sexta</h3>
+    <table>
+      <tr><th>Horário</th><th>Bloco</th><th>O quê</th></tr>
+      <tr><td>08:00–08:30</td><td>—</td><td>Acordar, café, <b>sem rolo infinito no celular</b></td></tr>
+      <tr><td>08:30–10:30</td><td><b>1 · Teoria</b></td><td>Conteúdo novo da trilha JS/Web (curso, doc, conceito). Cérebro descansado = conteúdo difícil</td></tr>
+      <tr><td>10:30–10:45</td><td>pausa</td><td>Levantar, água, alongar</td></tr>
+      <tr><td>10:45–11:50</td><td><b>2 · Prática</b></td><td>Exercícios do que estudou no bloco 1 (beecrowd/Exercism/desafio)</td></tr>
+      <tr><td>11:50–13:30</td><td>—</td><td>Buscar irmão (12:10) + almoço</td></tr>
+      <tr><td>13:30–15:30</td><td><b>3 · Projeto</b></td><td>Mão no código do projeto de portfólio da fase atual</td></tr>
+      <tr><td>15:30–17:00</td><td><b>4 · Facul ☕</b></td><td>Aulas EAD + atividades. <b>Matéria de Java entra aqui</b> — capriche, é a trilha Java rodando de graça</td></tr>
+      <tr><td>17:00+</td><td>—</td><td>Bateria (dias de treino) / livre / Laura</td></tr>
+      <tr><td>21:00–21:30</td><td><b>5 · Inglês</b></td><td>Todo dia, inegociável</td></tr>
+      <tr><td>21:30–21:45</td><td><b>6 · Fecho</b></td><td>Commit do dia + anotar 1 coisa que aprendeu (vira post depois)</td></tr>
+    </table>
+    <p><b>Dias de bateria:</b> corte o Bloco 3 pra 1h. Constância &gt; volume. <b>Semana de prova da facul:</b> Bloco 1 vira estudo de Java/prova — a trilha não para, só muda de cor.</p>
+    <h3>Fim de semana</h3>
+    <ul class="plain">
+      <li>Meta mínima: <b>1 commit + 20 min de inglês</b>. O streak não quebra nunca.</li>
+      <li>Domingo, 20 min à noite: revisar a semana, marcar metas aqui no diário e planejar a próxima.</li>
+    </ul>
+    <h3>Regras anti-naufrágio</h3>
+    <ul class="plain">
+      <li>Celular longe nos blocos de estudo (ou app de bloqueio).</li>
+      <li>Dispersou? Pomodoro: 25 min foco / 5 min pausa.</li>
+      <li>Falhou um dia? <b>Não compensa dobrando.</b> Só volta no dia seguinte — culpa afunda rotina.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== RECURSOS ==================== -->
+<section class="panel" id="recursos">
+  <div class="card">
+    <h2><span class="tagmes">Biblioteca do navio</span>🗺 Todos os links</h2>
+    <div class="grid2">
+      <div>
+        <h3>Fundamentos & JS</h3>
+        <div class="linkrow">
+          <a href="https://www.cursoemvideo.com/" target="_blank">Curso em Vídeo (Guanabara)</a>
+          <a href="https://javascript.info/" target="_blank">JavaScript.info</a>
+          <a href="https://developer.mozilla.org/pt-BR/" target="_blank">MDN (PT)</a>
+          <a href="https://www.theodinproject.com/" target="_blank">The Odin Project</a>
+          <a href="https://www.freecodecamp.org/learn" target="_blank">freeCodeCamp</a>
+          <a href="https://cs50.harvard.edu/x/" target="_blank">CS50 Harvard (faça com calma, ao longo de meses)</a>
+          <a href="https://roadmap.sh/" target="_blank">roadmap.sh (mapas visuais de qualquer trilha)</a>
+        </div>
+        <h3>Front-end</h3>
+        <div class="linkrow">
+          <a href="https://react.dev/learn" target="_blank">React docs</a>
+          <a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank">TS Handbook</a>
+          <a href="https://www.frontendmentor.io/" target="_blank">Frontend Mentor</a>
+          <a href="https://www.rocketseat.com.br/" target="_blank">Rocketseat</a>
+        </div>
+        <h3>Back-end JS & banco</h3>
+        <div class="linkrow">
+          <a href="https://nodejs.org/pt" target="_blank">Node.js</a>
+          <a href="https://expressjs.com/pt-br/" target="_blank">Express</a>
+          <a href="https://sqlbolt.com/" target="_blank">SQLBolt</a>
+          <a href="https://www.postgresql.org/docs/" target="_blank">PostgreSQL</a>
+        </div>
+        <h3>Exercícios</h3>
+        <div class="linkrow">
+          <a href="https://judge.beecrowd.com/" target="_blank">beecrowd</a>
+          <a href="https://exercism.org/" target="_blank">Exercism</a>
+        </div>
+      </div>
+      <div>
+        <h3>☕ Java & Spring</h3>
+        <div class="linkrow">
+          <a href="https://www.cursoemvideo.com/curso/java-basico/" target="_blank">Java Básico (Curso em Vídeo)</a>
+          <a href="https://www.cursoemvideo.com/curso/java-poo/" target="_blank">Java POO (Curso em Vídeo)</a>
+          <a href="https://www.youtube.com/@DevDojoBrasil" target="_blank">DevDojo — Maratona Java</a>
+          <a href="https://loiane.training/" target="_blank">Loiane Training</a>
+          <a href="https://start.spring.io/" target="_blank">Spring Initializr</a>
+          <a href="https://spring.io/guides" target="_blank">Spring Guides</a>
+          <a href="https://www.youtube.com/@MichelliBrito" target="_blank">Michelli Brito</a>
+          <a href="https://www.youtube.com/@kipperdev" target="_blank">Fernanda Kipper</a>
+          <a href="https://www.baeldung.com/" target="_blank">Baeldung</a>
+        </div>
+        <h3>🤖 IA</h3>
+        <div class="linkrow">
+          <a href="https://docs.claude.com/" target="_blank">Anthropic API docs</a>
+          <a href="https://platform.openai.com/docs" target="_blank">OpenAI docs</a>
+          <a href="https://www.deeplearning.ai/short-courses/" target="_blank">DeepLearning.AI</a>
+          <a href="https://huggingface.co/learn" target="_blank">Hugging Face Learn</a>
+          <a href="https://n8n.io/" target="_blank">n8n</a>
+        </div>
+        <h3>Python, Docker & Cloud</h3>
+        <div class="linkrow">
+          <a href="https://www.cursoemvideo.com/curso/python-3-mundo-1/" target="_blank">Python (Curso em Vídeo)</a>
+          <a href="https://docs.python.org/pt-br/3/tutorial/" target="_blank">Tutorial Python PT</a>
+          <a href="https://docs.docker.com/get-started/" target="_blank">Docker Get Started</a>
+          <a href="https://skillbuilder.aws/" target="_blank">AWS Skill Builder</a>
+        </div>
+        <h3>Inglês & carreira</h3>
+        <div class="linkrow">
+          <a href="https://www.youtube.com/@Fireship" target="_blank">Fireship</a>
+          <a href="https://youglish.com/" target="_blank">YouGlish</a>
+          <a href="https://apps.ankiweb.net/" target="_blank">Anki</a>
+          <a href="https://dev.to/" target="_blank">dev.to</a>
+          <a href="https://www.99freelas.com.br/" target="_blank">99freelas</a>
+          <a href="https://www.workana.com/" target="_blank">Workana</a>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">Dica: se um link de curso mudar com o tempo, busque pelo nome do criador — Guanabara, DevDojo, Loiane, Michelli Brito e Fernanda Kipper são referências estáveis da comunidade BR.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="quote">"O One Piece existe — mas ninguém chega lá sem zarpar."</div>
+  <div>Grand Line Dev · feito para o Lucas · progresso salvo automaticamente</div>
+  <div class="savemsg" id="savemsg"></div>
+</footer>
+
+<script>
+(function(){
+  var KEY='lucas-grandline-progress';
+  var panels=document.querySelectorAll('section.panel');
+  var navBtns=document.querySelectorAll('[data-go]');
+  var boxes=document.querySelectorAll('input[data-k]');
+  var saveMsg=document.getElementById('savemsg');
+  var saveTimer=null;
+
+  function go(id){
+    panels.forEach(function(p){p.classList.toggle('show',p.id===id);});
+    document.querySelectorAll('nav.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.go===id);});
+    document.querySelectorAll('.island').forEach(function(b){b.classList.toggle('active',b.dataset.go===id);});
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  navBtns.forEach(function(b){b.addEventListener('click',function(){go(b.dataset.go);});});
+
+  function updateCounts(){
+    ['f1','f2','f3','f4'].forEach(function(f){
+      var all=document.querySelectorAll('input[data-k^="'+f+'-"]');
+      var done=document.querySelectorAll('input[data-k^="'+f+'-"]:checked');
+      var pct=all.length?Math.round(done.length/all.length*100):0;
+      var c=document.querySelector('[data-count="'+f+'"]'); if(c)c.textContent=done.length+'/'+all.length;
+      var bar=document.querySelector('[data-bar="'+f+'"]'); if(bar)bar.style.width=pct+'%';
+      var p=document.querySelector('[data-pct="'+f+'"]'); if(p)p.textContent=pct+'%';
+    });
+  }
+
+  function collect(){
+    var st={};
+    boxes.forEach(function(b){ if(b.checked) st[b.dataset.k]=1; });
+    return st;
+  }
+
+  async function save(){
+    if(saveMsg)saveMsg.textContent='salvando…';
+    try{
+      if(window.storage){ await window.storage.set(KEY, JSON.stringify(collect())); if(saveMsg)saveMsg.textContent='progresso salvo ✓'; }
+      else { if(saveMsg)saveMsg.textContent='(sem armazenamento neste ambiente — progresso só nesta sessão)'; }
+    }catch(e){ if(saveMsg)saveMsg.textContent='não consegui salvar agora — tento de novo na próxima marcação'; }
+    if(saveTimer)clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){if(saveMsg)saveMsg.textContent='';},2500);
+  }
+
+  async function load(){
+    try{
+      if(!window.storage)return;
+      var r=await window.storage.get(KEY);
+      if(r&&r.value){
+        var st=JSON.parse(r.value);
+        boxes.forEach(function(b){ if(st[b.dataset.k]) b.checked=true; });
+      }
+    }catch(e){ /* primeira visita: chave não existe ainda */ }
+    updateCounts();
+  }
+
+  boxes.forEach(function(b){
+    b.addEventListener('change',function(){ updateCounts(); save(); });
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
